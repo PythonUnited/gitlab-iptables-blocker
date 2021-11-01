@@ -8,7 +8,7 @@ login page in Gitlab.
 Add the following line to crontab:
 
 ```
-@reboot ~/gitlab_iptables_blocker/add_iptables_block.sh
-@hourly ~/gitlab_iptables_blocker/add_iptables_block.sh 
-@hourly ~/gitlab_iptables_blocker/update_blocked_ips.sh 
+@reboot ~/gitlab-iptables-blocker/add_iptables_block.sh
+@hourly ~/gitlab-iptables-blocker/add_iptables_block.sh 
+@hourly ~/gitlab-iptables-blocker/update_blocked_ips.sh 
 ```
