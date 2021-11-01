@@ -16,7 +16,7 @@ done <<< "$BAD_IPS"
 UNIQ_BAD_IP_RANGES=`echo "$BAD_IP_RANGES" | sort | uniq`
 
 
-BLOCKED_IPS_FILE=`cat blocked_ips.txt`
+BLOCKED_IPS_FILE=`cat ~/gitlab-iptables-blocker/blocked_ips.txt`
 while read -r line; do
     if ! echo "$BLOCKED_IPS_FILE" | grep -q $line; then
         echo "Adding $line to blocked_ips.txt" 
