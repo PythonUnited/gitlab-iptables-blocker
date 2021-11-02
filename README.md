@@ -16,9 +16,9 @@ The scripts expect to live in `~/gitlab-iptables-blocker`.
 Add the following lines to crontab:
 
 ```
-@reboot ~/gitlab-iptables-blocker/add_iptables_block.sh
-@hourly ~/gitlab-iptables-blocker/add_iptables_block.sh 
-@hourly ~/gitlab-iptables-blocker/update_blocked_ips.sh 
+@reboot cd ~/gitlab-iptables-blocker && ./add_iptables_block.sh
+@hourly cd ~/gitlab-iptables-blocker && ./add_iptables_block.sh 
+@hourly cd ~/gitlab-iptables-blocker && ./update_blocked_ips.sh 
 ```
 
 Blocked IPs are stored in `~/gitlab-iptables-blocker/blocked_ips`
