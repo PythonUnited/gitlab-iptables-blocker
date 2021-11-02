@@ -1,25 +1,27 @@
 #!/bin/bash
 
-PATTERN="/users/sign_in"
-GREP_PATH="/var/opt/gitlab/nginx/logs/gitlab_access.log*"
-GREP_CMD="/usr/bin/zgrep $PATTERN $GREP_PATH | grep POST | grep -v 302| grep 'python-requests'"
+pattern="/users/sign_in"
+grep_path="/var/opt/gitlab/nginx/logs/gitlab_access.log*"
+grep_cmd="/usr/bin/zgrep $pattern $grep_path | grep POST | grep -v 302| grep 'python-requests'"
 
-CONTAINER_ID=`docker ps |grep gitlab-ce |awk '{print $1}'`
-NGINX_LOGS=`docker exec -it $CONTAINER_ID sh -c "$GREP_CMD"`
+container_id=`docker ps |grep gitlab-ce |awk '{print $1}'`
+nginx_logs=`docker exec $container_id sh -c "$grep_cmd"`
 
-BAD_IPS=`echo "$NGINX_LOGS" | awk '{ print $1 }' | awk -F: '{ print $2 }'`
-BAD_IP_RANGES=$(
-while read -r line; do
-    echo `ipcalc $line | grep Network | awk '{print $2}'`
-done <<< "$BAD_IPS"
+bad_ips=`echo "$nginx_logs" | awk '{ print $1 }' | awk -F: '{ print $2 }'`
+bad_ip_ranges=$(
+    while read -r line; do
+        echo `ipcalc $line | grep Network | awk '{print $2}'`
+    done <<< "$bad_ips"
 )
-UNIQ_BAD_IP_RANGES=`echo "$BAD_IP_RANGES" | sort | uniq`
+uniq_bad_ip_ranges=`echo "$bad_ip_ranges" | sort | uniq`
 
+blocked_ips_file=~/gitlab-iptables-blocker/blocked_ips.txt
+touch $blocked_ips_file
+blocked_ips=`cat $blocked_ips_file`
 
-BLOCKED_IPS_FILE=`cat ~/gitlab-iptables-blocker/blocked_ips.txt`
 while read -r line; do
-    if ! echo "$BLOCKED_IPS_FILE" | grep -q $line; then
+    if [ ! -z "$uniq_bad_ip_ranges" ] && ! echo "$blocked_ips" | grep -q $line; then
         echo "Adding $line to blocked_ips.txt" 
-        echo "$line" >> blocked_ips.txt
+        echo "$line" >> "$blocked_ips_file"
     fi
-done <<< $UNIQ_BAD_IP_RANGES
+done <<< $uniq_bad_ip_ranges
